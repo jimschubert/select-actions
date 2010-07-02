@@ -1,0 +1,18 @@
+{
+   "content_scripts": [ {
+      "all_frames": true,
+      "js": [ "select_actions.js" ],
+      "matches": [ "http://*/*", "https://*/*" ],
+      "run_at": "document_start"
+   } ],
+   "description": "Display a popup menu for utility actions on selected text.",
+   "icons": {
+      "128": "icon.png",
+      "16": "icon.png",
+      "32": "icon.png",
+      "48": "icon.png"
+   },
+   "name": "Select Actions",
+   "update_url": "http://clients2.google.com/service/update2/crx",
+   "version": "1.0.0.415"
+}
