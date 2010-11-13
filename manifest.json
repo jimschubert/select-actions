@@ -1,18 +1,15 @@
 {
-   "content_scripts": [ {
-      "all_frames": true,
-      "js": [ "select_actions.js" ],
-      "matches": [ "http://*/*", "https://*/*" ],
-      "run_at": "document_start"
-   } ],
-   "description": "Display a popup menu for utility actions on selected text.",
-   "icons": {
-      "128": "icon.png",
-      "16": "icon.png",
-      "32": "icon.png",
-      "48": "icon.png"
-   },
-   "name": "Select Actions",
-   "update_url": "http://clients2.google.com/service/update2/crx",
-   "version": "1.0.0.415"
+    "name": "Select Actions",
+    "version": "1.0.1",
+    "permissions": ["contextMenus"],
+    "background_page": "background.html",
+    "description": "Display a contextopup menu for utility actions on selected text.",
+    "icons": {
+        "128": "icon.png",
+        "16": "icon.png",
+        "32": "icon.png",
+        "48": "icon.png"
+    },
+    "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC7Osil6Pz7nn9GXBRCMOhGtqVGMRSw+dE5QwuewRg/I0JZ/r89FesY20nguh/7JxB6oQ7rasjkYduDReS3QHrsnm2r4er1Bal7n7iJJBPnjp68IeUzlgfmfwKvihRe1hFeSdx3mQDf1/yrDTrFrAyccF/XwKmcRo99PgCMBoi2wwIDAQAB",
+    "update_url": "http://clients2.google.com/service/update2/crx"
 }
