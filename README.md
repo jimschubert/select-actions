@@ -6,9 +6,10 @@ Select Actions is an extension for Google Chrome_
 Select Actions creates a context menu which provides actions for selected text or page elements.
 
 It is possible to do the following:
- * Select text, right-click, choose Actions -> Web -> Search on Bing
- * Right-click on a page, choose Actions -> Google -> Search on Blogs
- * Right-click on an RSS feed icon, choose Actions -> Google -> Add to Reader
+
+  *  Select text, right-click, choose Actions -> Web -> Search on Bing
+  *  Right-click on a page, choose Actions -> Google -> Search on Blogs
+  *  Right-click on an RSS feed icon, choose Actions -> Google -> Add to Reader
 
 This extension provides a context menu for text selection.  Better yet, many of the options fall back to selecting the image url, link url, or page url if you haven't selected any text.
 
