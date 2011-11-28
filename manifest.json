@@ -1,6 +1,6 @@
 {
     "name": "Select Actions",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "permissions": ["contextMenus"],
     "background_page": "background.html",
     "description": "Display a contextopup menu for utility actions on selected text.",

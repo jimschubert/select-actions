@@ -27,9 +27,25 @@ Copyright 2010 Jim Schubert, www.ipreferjim.com
           -|Add to Bookmarks|
           -|Add to Reader|
 */
-
-var debugFlag = false;
-var contexts = ['all', 'page', 'selection', 'link', 'editable', 'image', 'video', 'audio'];
+var debugFlag = false,
+    contexts = ['all', 'page', 'selection', 'link', 'editable', 'image', 'video', 'audio'],
+    e = encodeURIComponent,
+    upd = function(name, tab, url) {
+        if(url) {
+            name = name || "select-actions function";
+            debug("Calling " + name + " for url: " + url);
+            chrome.tabs.update(tab.id, {
+                "url": url,
+                "selected": true
+            }, null);
+        }
+    },
+    text = function(info) {
+        var s = info.selectionText || info.linkUrl || info.srcUrl || info.pageUrl;
+        return s;
+    },
+    resource = chrome.extension.getURL;
+    
 var menus = {
     "Actions": {
         "id": 0,
@@ -38,27 +54,25 @@ var menus = {
     },
     "Social": {
         "id": 0,
-        "children": [{
+        "children": [
+        /* {
             "title": "Share on Facebook",
-            "icon": chrome.extension.getURL("facebook_icon.gif"),
+            "icon": resource("facebook_icon.gif"),
             "fn": function (info, tab) {
-                var s = info.selectionText || info.linkUrl || info.srcUrl || info.pageUrl;
-                if (!s) {
-                    return;
-                }
+                var s = text(info);
+                if (!s) { return; }
 
                 debug("Calling Share on Facebook action for " + s);
 
                 var d = document,
-                    f = 'http://www.facebook.com/connect/prompt_feed.php?&message=',
-                    l = window.location,
-                    e = encodeURIComponent;
-                1;
+                    f = 'http://www.facebook.com/connect/prompt_feed.php/?message=',
+                    l = window.location; 
+                    
                 try {
                     if (!/^(.*\.)?facebook\.[^.]*$/.test(l.host)) {
-                        throw (0); /* this forces the window.open in catch */
+                        throw (0);
                     }
-                    users_setStatus(p);
+                    users_setStatus(s);
                 } catch (z) {
                     debug("Share on Facebook catch block");
                     if (!window.open(f + s, 'status', 'toolbar=0,status=0,resizable=1,width=626,height=436')) {
@@ -66,55 +80,46 @@ var menus = {
                     }
                 }
             }
-        },
+        },*/
         {
             "title": "Share on Twitter",
-            "icon": chrome.extension.getURL("twitter_icon.gif"),
+            "icon": resource("twitter_icon.gif"),
             "fn": function (info, tab) {
-                var s = info.selectionText || info.linkUrl || info.srcUrl || info.pageUrl;
-                if (!s) {
-                    return;
-                }
-                debug("Calling Share on Twitter action for " + s);
-                s = encodeURIComponent(s);
+                var s = text(info);
+                if (!s) { return;}
+                s = e(s);
                 s = s.replace(/\r\n|\r|\n/g, " ,");
                 var url = "http://twitter.com/?status=" + s.replace(/ /g, "+");
-
-                debug("Calling Share on Twitter for url: " + url);
-
-                chrome.tabs.update(tab.id, {
-                    "url": url,
-                    "selected": true
-                }, null);
+                upd("Share on Twitter", tab, url);
             }
         },
         {
-            "title": "Note on Facebook",
-            "icon": chrome.extension.getURL("facebook_icon.gif"),
+            "title": "Share on Facebook",
+            "icon": resource("facebook_icon.gif"),
             "fn": function (info, tab) {
-                var s = info.selectionText || info.linkUrl || info.srcUrl || info.pageUrl;
-                if (s) {
-                    var site = info.pageUrl;
-                    debug("Calling Note on Facebook action for " + s);
+                var s = text(info);
+                if (!s) { return; }
+                
+                var site = info.pageUrl;
+                debug("Calling Share on Facebook action for " + s);
 
-                    var f = 'http://www.facebook.com/share',
-                        e = encodeURIComponent,
-                        p = '.php?u=' + e(site) + '&t=' + e(tab.title);
-                    1;
-                    try {
-                        if (!/^(.*\.)?facebook\.[^.]*$/.test(l.host)) {
-                            throw (0);
-                        }
-                        share_internal_bookmarklet(p);
-                    } catch (z) {
-                        debug("Note on Facebook catch block");
-                        if (!window.open(f + 'r' + p, 'sharer', 'toolbar=0,status=0,resizable=1,width=626,height=436')) {
-                            var url = f + p;
-                            chrome.tabs.update(tab.id, {
-                                "url": url,
-                                "selected": true
-                            }, null);
-                        }
+                var f = 'http://www.facebook.com/share',
+                    e = encodeURIComponent,
+                    p = '.php?u=' + e(site) + '&t=' + e(tab.title);
+                1;
+                try {
+                    if (!/^(.*\.)?facebook\.[^.]*$/.test(l.host)) {
+                        throw (0);
+                    }
+                    share_internal_bookmarklet(p);
+                } catch (z) {
+                    debug("Share on Facebook catch block");
+                    if (!window.open(f + 'r' + p, 'sharer', 'toolbar=0,status=0,resizable=1,width=626,height=436')) {
+                        var url = f + p;
+                        chrome.tabs.update(tab.id, {
+                            "url": url,
+                            "selected": true
+                        }, null);
                     }
                 }
             }
@@ -123,69 +128,28 @@ var menus = {
     "Web": {
         "id": 0,
         "children": [
-        /*{
-            "title": "Search on Yahoo",
-            "icon": null,
-            "fn": function (info, tab) {
-
-                var s = info.selectionText || info.linkUrl || info.srcUrl || info.pageUrl;
-                if (!s) {
-                    return;
-                }
-                s = s.replace(/\r\n|\r|\n/g, " ,");
-                var url = "http://search.yahooapis.com/WebSearchService/V1/webSearch?query=" + s.replace(/ /g, "+");
-
-                debug("Calling Search on Yahoo for url: " + url);
-
-                chrome.tabs.update(tab.id, {
-                    "url": url,
-                    "selected": true
-                }, null);
-
-            }
-        }, */
         {
             "title": "Search on Bing",
             "icon": null,
             "fn": function (info, tab) {
-
-                var s = info.selectionText || info.linkUrl || info.srcUrl || info.pageUrl;
-                if (!s) {
-                    return;
-                }
-                s = s.replace(/\r\n|\r|\n/g, " ,");
+                var s = text(info);
+                if (!s) { return; }
+                s = e(s.replace(/\r\n|\r|\n/g, " ,"));
                 var url = "http://www.bing.com/search/search.aspx?q=" + s.replace(/ /g, "+");
-
-                debug("Calling Search on Bing for url: " + url);
-
-                chrome.tabs.update(tab.id, {
-                    "url": url,
-                    "selected": true
-                }, null);
-
+                upd("Search on Bing", tab, url);
             }
         },
         {
             "title": "Search on Wikipedia",
             "icon": null,
             "fn": function (info, tab) {
-
-                var s = info.selectionText || info.linkUrl || info.srcUrl || info.pageUrl;
-                if (!s) {
-                    return;
-                }
+                var s = text(info);
+                if (!s) { return; }
                 s = s.replace(/\r\n|\r|\n/g, " ,");
-
-                var e = navigator.language || "en";
-                e = e.substring(0, 2);
-                var url = "http://" + e + ".wikipedia.org/wiki/Special:Search?go=Go&search=" + s.replace(/ /g, "+");
-
-                debug("Calling Search on Wikipedia for url: " + url + " tabId: " + tab.id);
-
-                chrome.tabs.update(tab.id, {
-                    "url": url,
-                    "selected": true
-                }, null);
+                var lang = navigator.language || "en";
+                lang = lang.substring(0, 2);
+                var url = "http://" + lang + ".wikipedia.org/wiki/Special:Search?go=Go&search=" + e(s.replace(/ /g, "+"));
+                upd("Search on Wikipedia", tab, url);
             }
         }]
     },
@@ -193,116 +157,74 @@ var menus = {
         "id": 0,
         "children": [{
             "title": "Add to Calendar",
-            "icon": chrome.extension.getURL("google_icon.gif"),
+            "icon": resource("google_icon.gif"),
             "fn": function (info, tab) {
-                var s = info.selectionText || info.linkUrl || info.srcUrl || info.pageUrl;
-                if (!s) {
-                    debug("Add to Calendar: no value received.");
-                    return;
-                }
+                var s = text(info);
+                if (!s) { return; }
                 var t = prompt('Please enter a description for the event', s);
                 if (t) {
-                    var url = ('http://www.google.com/calendar/event?ctext=' + t + '&action=TEMPLATE&pprop=HowCreated%3AQUICKADD');
-                    debug("Calling Add to Calendar for url: " + url);
-                    chrome.tabs.update(tab.id, {
-                        "url": url,
-                        "selected": true
-                    }, null);
+                    var url = ('http://www.google.com/calendar/event?text=' + e(t) + '&action=TEMPLATE&details=' + e(s) );
+                    upd("Add to Calendar", tab, url);
                 }
             }
         },
         {
             "title": "Add to Bookmarks",
-            "icon": chrome.extension.getURL("google_icon.gif"),
+            "icon": resource("google_icon.gif"),
             "fn": function (info, tab) {
-                var s = info.selectionText || info.linkUrl || info.srcUrl || info.pageUrl;
-                if (!s) {
-                    debug("Add to Bookmarks: no value received.");
-                    return;
+                var s = text(info);
+                if (!s) { return; }
+                var a = window;
+                var url = "http://www.google.com/bookmarks/mark?op=edit&output=popup&bkmk=" + e(info.pageUrl) + "&title=" + e(tab.title);
+                if(info.selectionText){
+                    url = url + "&notes=" + e(info.selectionText);
                 }
 
-                var a = window,
-                    c = encodeURIComponent;
-
-                    var url = "http://www.google.com/bookmarks/mark?op=edit&output=popup&bkmk=" + c(info.pageUrl) + "&title=" + c(tab.title);
-
-if(info.selectionText){
-  url = url + "&notes=" + info.selectionText;
-}
-
                 if (!a.open(url, "bkmk_popup", "left=" + ((a.screenX || a.screenLeft) + 10) + ",top=" + ((a.screenY || a.screenTop) + 10) + ",height=420px,width=550px,resizable=1,alwaysRaised=1")) {
-                debug("Calling Add to Bookmarks for url: " + url);
-                    chrome.tabs.update(tab.id, {
-                        "url": url,
-                        "selected": true
-                    }, null);
+                    upd("Add to Bookmarks", tab, url);
                 }
             }
         },
         {
             "title": "Add to Reader",
-            "icon": chrome.extension.getURL("google_icon.gif"),
+            "icon": resource("google_icon.gif"),
             "fn": function (info, tab) {
-
-
-                var s = info.linkUrl || info.srcUrl || info.pageUrl;
-                if (!s) {
-                    debug("Add to Reader: no value received.");
-                    return;
-                }
-                  var url = 'http://www.google.com/reader/view/feed/' + encodeURIComponent(s);
-                  debug("Calling Add to reader for url: " + url);
-                  chrome.tabs.update(tab.id, {
-                      "url": url,
-                      "selected": true
-                  }, null);
+                var s = text(info);
+                if (!s) { return; }
+                var url = 'http://www.google.com/reader/view/feed/' + e(s);
+                upd("Add to Reader", tab, url);
             }
         },
         {
             "title": "Search Blogs",
-            "icon": chrome.extension.getURL("google_icon.gif"),
+            "icon": resource("google_icon.gif"),
             "fn": function (info, tab) {
-                var s = info.selectionText || info.linkUrl || info.srcUrl || info.pageUrl;
-                if (s) {
-                    debug("Calling Search Blogs for query: " + s);
-                    var url = ('http://blogsearch.google.com/blogsearch?q=' + s);
-                    chrome.tabs.update(tab.id, {
-                        "url": url,
-                        "selected": true
-                    }, null);
-                }
+                var s = text(info);
+                if (!s) { return; }
+                var url = 'http://blogsearch.google.com/blogsearch?q=' + e(s);
+                upd("Search Blogs", tab, url);                
             }
         },
         {
             "title": "Translate",
-            "icon": chrome.extension.getURL("google_icon.gif"),
+            "icon": resource("google_icon.gif"),
             "fn": function (info, tab) {
                 var s = info.selectionText;
-                var e = navigator.language || "en";
+                var lang = navigator.language || "en";
                 if (s) {
-                    debug("Calling Translate for query: " + s);
-                    var url = ('http://translate.google.com/#auto|' + e.substring(0, 2) + '|' + s);
-                    chrome.tabs.update(tab.id, {
-                        "url": url,
-                        "selected": true
-                    }, null);
+                    var url = ('http://translate.google.com/#auto|' + lang.substring(0, 2) + '|' + e(s) );
+                    upd("Translate", tab, url);
                 }
                 else {
                     var s = info.linkUrl || info.srcUrl || info.pageUrl;
-                    debug("Calling Translate for url: " + s);
-                    var url = ('http://translate.google.com/translate?js=y&u=' + escape(s) + '&tbb=1&sl=auto&tl=' + e);
-
-                    chrome.tabs.update(tab.id, {
-                        "url": url,
-                        "selected": true
-                    }, null);
-
+                    var url = ('http://translate.google.com/translate?js=y&u=' + e(s) + '&tbb=1&sl=auto&tl=' + lang);
+                    upd("Translate", tab, url);
                 }
             }
         } /* end of child */ ,
         {
             "title": "Define",
-            "icon": chrome.extension.getURL("google_icon.gif"),
+            "icon": resource("google_icon.gif"),
             "fn": function (info, tab) {
                 var s = info.selectionText;
                 if (!s) {
@@ -310,17 +232,13 @@ if(info.selectionText){
                     alert("Please select some text to define.");
                 }
                 s = String(s).replace(/\r\n|\r|\n/g, " ,");
-                var url = "http://www.google.com/search?q=define:" + String(s).replace(/ /g, "+");
-                debug("Calling Define for url: " + url);
-                chrome.tabs.update(tab.id, {
-                    "url": url,
-                    "selected": true
-                }, null);
+                var url = "http://www.google.com/search?q=define:" + e( String(s).replace(/ /g, "+") );
+                upd("Define", tab, url);
             }
         } /*end of child */ ,
         {
             "title": "Map",
-            "icon": chrome.extension.getURL("google_icon.gif"),
+            "icon": resource("google_icon.gif"),
             "fn": function (info, tab) {
                 var s = info.selectionText;
                 if (!s) {
@@ -328,28 +246,23 @@ if(info.selectionText){
                     alert("Please select an address to map.");
                 }
                 s = s.replace(/\r\n|\r|\n/g, " ,");
-                var url = ("http://maps.google.com?q=" + s.replace(/ /g, "+"));
-                debug("Calling Map for url: " + url);
-                chrome.tabs.update(tab.id, {
-                    "url": url,
-                    "selected": true
-                }, null);
+                var url = ("http://maps.google.com?q=" + e(s.replace(/ /g, "+")) );
+                upd("Map", tab, url);
             }
         } /*end of child*/ ]
     }
 };
 
 function debug(msg) {
-    if ((debugFlag == true) && console && console.log) {
-        console.log(msg);
+    if (debugFlag == true) {
+        if (msg) console.log(msg);
     }
 }
 
-
 function genericOnClick(info, tab) {
-    logger("item " + info.menuItemId + " was clicked");
-    logger("info: " + JSON.stringify(info));
-    logger("tab: " + JSON.stringify(tab));
+    debug("item " + info.menuItemId + " was clicked");
+    debug("info: " + JSON.stringify(info));
+    debug("tab: " + JSON.stringify(tab));
 }
 
 function createTopLevel() {
@@ -371,8 +284,8 @@ function createSecondLevel() {
                 "contexts": contexts,
                 "onclick": genericOnClick /* todo: change this to the menu's fn */
             }, function () {
-                var s = item;
-               /* debug("Created second level context menu for " + s); */
+               /* var s = item;
+                debug("Created second level context menu for " + s); */
             });
         }
 
@@ -384,8 +297,8 @@ function createSecondLevel() {
                 "contexts": contexts,
                 "onclick": menuItem["fn"]
             }, function () {
-                var s = menuItem["title"];
-               /* debug("Created second level context menu for " + s); */
+               /*  var s = menuItem["title"];
+               debug("Created second level context menu for " + s); */
             });
         }
     }
